@@ -35,6 +35,21 @@ void richardson_alpha(double *AB, double *RHS, double *X, double *alpha_rich, in
   // 2. Update x = x + alpha*r (use daxpy)
   // 3. Check convergence: ||r||_2 < tol (use dnrm2)
   // 4. Store residual norm in resvec and repeat
+  
+  //SUBROUTINE DGBMV(TRANS,M,N,KL,KU,ALPHA,A,LDA,X,INCX,BETA,Y,INCY)
+  //y= alpha*A*x + beta*y
+  double alpha = -1.;
+  double beta = 1.;
+  int inc = 1;
+
+  for(size_t i=1;i<(*alpha_rich);i++){
+    //dgbmv_('N',&la,&la,&kl,&ku,&alpha,AB,&lab,X,&beta,RHS,&inc);
+
+    //daxpy_(&la,&alpha_rich,resvec,&inc,X,&inc);
+
+    //resvec[i] = dnrm2_(&la,RHS,&inc);
+
+  }
 }
 
 /**

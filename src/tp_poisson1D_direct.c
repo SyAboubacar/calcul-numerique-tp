@@ -68,6 +68,10 @@ int main(int argc,char *argv[])
   write_vec(EX_SOL, &la, "EX_SOL.dat");
   write_vec(X, &la, "X_grid.dat");
 
+
+
+
+
   /* Set up band storage parameters for tridiagonal matrix */
   kv=1;             /* Number of superdiagonals */
   ku=1;             /* Number of superdiagonals in original matrix */
@@ -83,15 +87,30 @@ int main(int argc,char *argv[])
   printf("Solution with LAPACK\n");
   ipiv = (int *) calloc(la, sizeof(int));  /* Pivot indices for LU factorization */
 
+  clock_t start, end;
+  double time;
+
   /* LU Factorization using LAPACK's general band factorization */
   if (IMPLEM == TRF) {
+    start = clock();
     dgbtrf_(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
+    end = clock();
+    time = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("TIME : %lf",time);
   }
 
   /* LU for tridiagonal matrix (can replace dgbtrf_) - custom implementation */
   if (IMPLEM == TRI) {
+
+    start = clock();
     dgbtrftridiag(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
+    end = clock();
+    time = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("TIME : %lf",time);
+    
+
   }
+
 
   /* Back-substitution to solve the system after factorization */
   if (IMPLEM == TRI || IMPLEM == TRF){
@@ -116,11 +135,16 @@ int main(int argc,char *argv[])
     int ldab = 2*kl + ku + 1;  // Lignes dans AB = 3
     int ldb = la;        // Dimension de B
 
-
+    start = clock();
     dgbsv_(&n, &kl, &ku, &nrhs, AB, &ldab, ipiv, RHS, &ldb, &info);
+    end = clock();
+    time = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("TIME : %lf",time);
+    
     if (info!=0){printf("\n INFO DGBSV = %d\n",info);}
 
   }
+
 
   /* Write results to files */
   write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "LU.dat");  /* LU factors */
@@ -132,9 +156,9 @@ int main(int argc,char *argv[])
   printf("\nThe relative forward error is relres = %e\n",relres);
 
   /* Free allocated memory */
-  free(RHS);
-  free(EX_SOL);
-  free(X);
-  free(AB);
+  //free(RHS);
+  //free(EX_SOL);
+  //free(X);
+  //free(AB);
   printf("\n\n--------- End -----------\n");
 }

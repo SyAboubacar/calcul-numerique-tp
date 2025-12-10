@@ -8,6 +8,7 @@
 #include <math.h>
 #include <float.h>
 #include <limits.h>
+#include <time.h>
 #include "atlas_headers.h"
 
 /**

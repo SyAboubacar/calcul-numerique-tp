@@ -42,10 +42,15 @@ void set_GB_operator_colMajor_poisson1D_Id(double* AB, int *lab, int *la, int *k
   int m_lab = *lab;
   int m_kv = *kv;
   
-  for(size_t i=1;i<(m_lab*m_la)-1;i+=4){
+  for(size_t i=0;i<m_la*m_lab;i++){
     AB[i] = 0.;
-    AB[i+1] = 1.;
-    AB[i+2] = 0.;
+  }
+
+  for(size_t i=0;i<m_la*m_lab-2;i+=4){
+    AB[i] = 0.;
+    AB[i+1] = 0.;
+    AB[i+2] = 1.;
+    AB[i+3] = 0.;
   }
 
 
@@ -61,7 +66,7 @@ void set_analytical_solution_DBC_1D(double* EX_SOL, double* X, int* la, double* 
   // TODO: Compute the exact analytical solution at each grid point
   // This depends on the source term f(x) used in set_dense_RHS_DBC_1D
 
-  set_dense_RHS_DBC_1D(EX_SOL,la,BC0,BC1); // initialise the source vector
+  //set_dense_RHS_DBC_1D(EX_SOL,la,BC0,BC1); // initialise the source vector
   for(int i =0;i<(*la);i++){
     EX_SOL[i] = (*BC0) +X[i]*((*BC1)-(*BC0)); // T(x) = T0 + x*(T1 − T0)
   }
@@ -83,11 +88,11 @@ void set_grid_points_1D(double* x, int* la){
 }
 
 
-
 double relative_forward_error(double* x, double* y, int* la){
   // TODO: Compute the relative error using BLAS functions (dnrm2, daxpy or manual loop)
   int incx = 1;
   double nx = dnrm2_(la,x,&incx); // ||x||
+
   double alpha = -1.;
   daxpy_(la,&alpha,y,&incx,x,&incx); // x = alpha*y + x
   double n_x_minus_y = dnrm2_(la,x,&incx); // ||x-y|| 
@@ -95,6 +100,7 @@ double relative_forward_error(double* x, double* y, int* la){
   double relative_forward = n_x_minus_y / nx;
   return relative_forward;
 }
+
 
 int indexABCol(int i, int j, int *lab){
   // TODO: Return the correct index formula for column-major band storage
@@ -106,6 +112,7 @@ int indexABCol(int i, int j, int *lab){
 int dgbtrftridiag(int *la, int*n, int *kl, int *ku, double *AB, int *lab, int *ipiv, int *info){
   // TODO: Implement specialized LU factorization for tridiagonal matrices
 
+  *ipiv = 1;
   double e = 1e-12;
   int _n = *n;
   for(size_t i =1;i<_n;i++){
@@ -115,9 +122,8 @@ int dgbtrftridiag(int *la, int*n, int *kl, int *ku, double *AB, int *lab, int *i
 
     AB[indexABCol(i,i,lab)] = AB[indexABCol(i,i,lab)] - AB[indexABCol(i-1,i,lab)]*mi;
 
-
   }
-  //int* _info = 0;
-  //info = *_info;
+
+  *info = 0;
   return *info;
 }

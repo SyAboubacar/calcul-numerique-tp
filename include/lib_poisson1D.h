@@ -214,3 +214,7 @@ int indexABCol(int i, int j, int *lab);
  * @return info value
  */
 int dgbtrftridiag(int *la, int *n, int *kl, int *ku, double *AB, int *lab, int *ipiv, int *info);
+
+double dnrm2_(int *n, double *x, int *incx);
+
+void daxpy_(int *n, double *alpha, double *x, int *incx, double *y, int *incy);

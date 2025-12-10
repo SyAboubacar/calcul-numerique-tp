@@ -101,12 +101,25 @@ int main(int argc,char *argv[])
       if (info!=0){printf("\n INFO DGBTRS = %d\n",info);}
     }else{
       printf("\n INFO = %d\n",info);
+      
     }
   }
 
   /* Alternative: solve directly using dgbsv */
   if (IMPLEM == SV) {
     // TODO : use dgbsv
+
+    int n = la;          // Ordre de la matrice
+    int kl = 1;         // Nombre de sous-diagonales
+    int ku = 1;         // Nombre de super-diagonales
+    int nrhs = 1;       // 1 vecteur colonne B
+    int ldab = 2*kl + ku + 1;  // Lignes dans AB = 3
+    int ldb = la;        // Dimension de B
+
+
+    dgbsv_(&n, &kl, &ku, &nrhs, AB, &ldab, ipiv, RHS, &ldb, &info);
+    if (info!=0){printf("\n INFO DGBSV = %d\n",info);}
+
   }
 
   /* Write results to files */

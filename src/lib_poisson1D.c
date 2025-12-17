@@ -26,11 +26,6 @@ void set_GB_operator_colMajor_poisson1D(double* AB, int *lab, int *la, int *kv){
   AB[1] = 0.;
   AB[m_la*m_lab-1] = 0.;
 
-  for(size_t i=0;i<m_la*m_lab;i++){
-      //printf("%f ", AB[i]);
-  }
-  //printf("\n");
-
 
 }
 

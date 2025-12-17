@@ -40,6 +40,7 @@ int main(int argc,char *argv[])
   if (argc == 2) {
     IMPLEM = atoi(argv[1]);
   } else if (argc > 2) {
+
     perror("Application takes at most one argument");
     exit(1);
   }
@@ -96,7 +97,7 @@ int main(int argc,char *argv[])
     dgbtrf_(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
     end = clock();
     time = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("TIME : %lf",time);
+    printf("TIME TRF: %lf",time);
   }
 
   /* LU for tridiagonal matrix (can replace dgbtrf_) - custom implementation */
@@ -106,7 +107,7 @@ int main(int argc,char *argv[])
     dgbtrftridiag(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
     end = clock();
     time = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("TIME : %lf",time);
+    printf("TIME TRI: %lf",time);
     
 
   }
@@ -116,7 +117,13 @@ int main(int argc,char *argv[])
   if (IMPLEM == TRI || IMPLEM == TRF){
     /* Solution (Triangular) - solve using the LU factors */
     if (info==0){
+
+      start = clock();
       dgbtrs_("N", &la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
+
+      end = clock();
+      time = ((double) (end - start)) / CLOCKS_PER_SEC;
+      printf("\n RESOLV TIME : %lf",time);
       if (info!=0){printf("\n INFO DGBTRS = %d\n",info);}
     }else{
       printf("\n INFO = %d\n",info);
@@ -128,10 +135,10 @@ int main(int argc,char *argv[])
   if (IMPLEM == SV) {
     // TODO : use dgbsv
 
-    int n = la;          // Ordre de la matrice
+    int n = la;         // Ordre de la matrice
     int kl = 1;         // Nombre de sous-diagonales
     int ku = 1;         // Nombre de super-diagonales
-    int nrhs = 1;       // 1 vecteur colonne B
+    int nrhs = 1;       // 1 vecteur B
     int ldab = 2*kl + ku + 1;  // Lignes dans AB = 3
     int ldb = la;        // Dimension de B
 
@@ -139,7 +146,7 @@ int main(int argc,char *argv[])
     dgbsv_(&n, &kl, &ku, &nrhs, AB, &ldab, ipiv, RHS, &ldb, &info);
     end = clock();
     time = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("TIME : %lf",time);
+    printf("TIME SV: %lf",time);
     
     if (info!=0){printf("\n INFO DGBSV = %d\n",info);}
 

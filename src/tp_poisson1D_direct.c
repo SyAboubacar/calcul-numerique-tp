@@ -119,7 +119,7 @@ int main(int argc,char *argv[])
     if (info==0){
 
       start = clock();
-      dgbtrs_("T", &la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
+      dgbtrs_("N", &la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
 
       end = clock();
       time = ((double) (end - start)) / CLOCKS_PER_SEC;

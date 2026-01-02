@@ -5,23 +5,39 @@
 /**********************************************/
 #include "lib_poisson1D.h"
 
+double pi = acos(-1.0);
+
 void eig_poisson1D(double* eigval, int *la){
   // TODO: Compute all eigenvalues for the 1D Poisson operator
+   
+  int n = *la;
+
+  for(int k=0;k<n;k++){
+    eigval[k] = 2 - 2*cos((k* pi)/(n+1));
+  }
 }
 
 double eigmax_poisson1D(int *la){
   // TODO: Compute and return the maximum eigenvalue for the 1D Poisson operator
-  return 0;
+  int n = *la;
+  int k = n;
+  double eigmax = 2 - 2*cos((k* pi)/(n+1));
+  return eigmax;
 }
 
 double eigmin_poisson1D(int *la){
   // TODO: Compute and return the minimum eigenvalue for the 1D Poisson operator
-  return 0;
+  int n = *la;
+  int k = 1;
+
+  double eigmin = 2 - 2*cos((k* pi)/(n+1));
+  return eigmin;
 }
 
 double richardson_alpha_opt(int *la){
   // TODO: Compute alpha_opt
-  return 0;
+  double opt = 2/(eigmin_poisson1D(la) + eigmax_poisson1D(la));
+  return opt;
 }
 
 /**
@@ -38,18 +54,52 @@ void richardson_alpha(double *AB, double *RHS, double *X, double *alpha_rich, in
   
   //SUBROUTINE DGBMV(TRANS,M,N,KL,KU,ALPHA,A,LDA,X,INCX,BETA,Y,INCY)
   //y= alpha*A*x + beta*y
+
   double alpha = -1.;
   double beta = 1.;
   int inc = 1;
+  char trans = 'N';
 
-  for(size_t i=1;i<(*alpha_rich);i++){
-    //dgbmv_('N',&la,&la,&kl,&ku,&alpha,AB,&lab,X,&beta,RHS,&inc);
+  
+  double norm_r,norm_b,rel;
 
-    //daxpy_(&la,&alpha_rich,resvec,&inc,X,&inc);
+  double *residus = (double*)malloc(*la * sizeof(double));
+  
+  // dcopy_(la,RHS,&inc,residus,&inc);
+  // dcopy_(la,X,&inc,old_x,&inc);
 
-    //resvec[i] = dnrm2_(&la,RHS,&inc);
+  // dgbmv_(&trans,la,lab,kl,ku,&alpha,AB,lab,X,&inc,&beta,residus,&inc); // r = RHS 
+  // daxpy_(la,alpha_rich,residus,&inc,X,&inc); // r = alpha*r + x
 
+
+  norm_b = cblas_dnrm2(*la,RHS,inc);
+  // norm_r = cblas_dnrm2(*la,residus,inc);
+  // rel = norm_r/norm_b;
+
+  // resvec[0] = rel;
+
+  *nbite = 0;
+  for(int k=0;k < *maxit;k++){
+    dcopy_(la, RHS, &inc, residus, &inc);
+
+    dgbmv_(&trans,la,la,kl,ku,&alpha,AB,lab,X,&inc,&beta,residus,&inc);
+
+    norm_r = cblas_dnrm2(*la,residus,inc);
+    rel = norm_r/norm_b;
+    resvec[k] = rel;
+
+    if(rel < *tol){
+      break;
+    }
+
+    daxpy_(la,alpha_rich,residus,&inc,X,&inc);
+
+    
+    printf("resvec[%d] : %lf \n",k+1,rel);
+    *nbite = k+1;
   }
+
+  free(residus);
 }
 
 /**

@@ -130,6 +130,7 @@ int main(int argc,char *argv[])
   }
 
   /* Write solution and convergence history to files */
+
   write_vec(SOL, &la, "SOL.dat");              /* Final solution */
 
   /* Write convergence history */

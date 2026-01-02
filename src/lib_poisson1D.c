@@ -83,9 +83,7 @@ double relative_forward_error(double* x, double* y, int* la){
 
 int indexABCol(int i, int j, int *lab){
   // TODO: Return the correct index formula for column-major band storage
-  //printf("%d\n",(i-j)+((*lab))*j +1);
   return (i-j)+(*lab)*j +2;
-  //return (i-j)+((*lab))*j +1;
 }
 
 int dgbtrftridiag(int *la, int*n, int *kl, int *ku, double *AB, int *lab, int *ipiv, int *info){

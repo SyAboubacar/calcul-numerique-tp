@@ -123,7 +123,7 @@ int main(int argc,char *argv[])
 
       end = clock();
       time = ((double) (end - start)) / CLOCKS_PER_SEC;
-      printf("\n RESOLV TIME : %lf",time);
+      printf("\n RESOLV  DGBTRS TIME : %lf",time);
       if (info!=0){printf("\n INFO DGBTRS = %d\n",info);}
     }else{
       printf("\n INFO = %d\n",info);

@@ -95,7 +95,7 @@ void richardson_alpha(double *AB, double *RHS, double *X, double *alpha_rich, in
     daxpy_(la,alpha_rich,residus,&inc,X,&inc);
 
     
-    printf("resvec[%d] : %lf \n",k+1,rel);
+    //printf("resvec[%d] : %lf \n",k+1,rel);
     *nbite = k+1;
   }
 
@@ -109,6 +109,14 @@ void richardson_alpha(double *AB, double *RHS, double *X, double *alpha_rich, in
 void extract_MB_jacobi_tridiag(double *AB, double *MB, int *lab, int *la,int *ku, int*kl, int *kv){
   // TODO: Extract diagonal elements from AB and store in MB
   // MB should contain only the diagonal of A
+
+  for (int i = 0; i < (*lab) * (*la); i++) {
+    MB[i] = 0.;
+  }
+
+  for (int i = 0; i < *la; i++) {
+    MB[*ku + i * (*lab)] = AB[*ku + i * (*lab)];
+  }
 }
 
 /**
@@ -118,6 +126,19 @@ void extract_MB_jacobi_tridiag(double *AB, double *MB, int *lab, int *la,int *ku
 void extract_MB_gauss_seidel_tridiag(double *AB, double *MB, int *lab, int *la,int *ku, int*kl, int *kv){
   // TODO: Extract diagonal and lower diagonal from AB
   // MB should contain the lower triangular part (including diagonal) of A
+
+  for (int i = 0; i < (*lab) * (*la); i++) {
+    MB[i] = 0.;
+  }
+
+  for (int i = 0; i < *la; i++) {
+    MB[*ku + i * (*lab)] = AB[*ku + i * (*lab)];
+  }
+
+  for (int i = 0; i < *la-1; i++) {
+    MB[(*ku +1) + i * (*lab)] = AB[(*ku +1) + i * (*lab)];
+  }
+
 }
 
 /**
@@ -128,5 +149,65 @@ void extract_MB_gauss_seidel_tridiag(double *AB, double *MB, int *lab, int *la,i
  */
 void richardson_MB(double *AB, double *RHS, double *X, double *MB, int *lab, int *la,int *ku, int*kl, double *tol, int *maxit, double *resvec, int *nbite){
   // TODO: Implement Richardson iterative method
+
+  double alpha = -1.;
+  double beta = 1.;
+  int inc = 1;
+  char trans = 'N';
+
+  double norm_r,norm_b,rel;
+
+  double *residus = (double*)malloc(*la * sizeof(double));
+  double *jc_gs = (double*)malloc(*la * sizeof(double));
+  int *ipiv = (int*)malloc(*la * sizeof(int));
+
+  norm_b = cblas_dnrm2(*la,RHS,inc);
+
+  const int nrhs = 1;
+  int info;
+  
+  int kl_MB = *kl;
+  int ku_MB = 0;
+  int lab_MB = 2*kl_MB + ku_MB + 1;
+
+  dgbtrf_(la, la,&kl_MB, &ku_MB, MB, &lab_MB,ipiv,&info);
+  if (info != 0) {
+    printf("DGBTRF error %d\n", info);
+    return;
+  }
+
+  *nbite = 0;
+  for(int k=0;k < *maxit;k++){
+    dcopy_(la, RHS, &inc, residus, &inc);
+
+    dgbmv_(&trans,la,la,kl,ku,&alpha,AB,lab,X,&inc,&beta,residus,&inc);
+
+    norm_r = cblas_dnrm2(*la,residus,inc);
+    rel = norm_r/norm_b;
+    resvec[k] = rel;
+
+    if(rel < *tol){
+      break;
+    }
+
+    dcopy_(la, residus, &inc, jc_gs, &inc);
+
+    dgbtrs_(&trans,la,&kl_MB, &ku_MB,&nrhs,MB, &lab_MB,ipiv,jc_gs, la,&info);
+
+    if (info != 0) {
+        printf("DGBTRS error %d\n", info);
+        break;
+    }
+
+    daxpy_(la, &beta, jc_gs, &inc, X, &inc);
+
+    //printf("resvec[%d] : %lf \n",k+1,rel);
+    *nbite = k+1;
+
+  }
+
+  free(ipiv);
+  free(residus);
+  free(jc_gs);
 }
 

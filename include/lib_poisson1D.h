@@ -219,3 +219,7 @@ int dgbtrftridiag(int *la, int *n, int *kl, int *ku, double *AB, int *lab, int *
 double dnrm2_(int *n, double *x, int *incx);
 
 void daxpy_(int *n, double *alpha, double *x, int *incx, double *y, int *incy);
+
+void dgbmv_(char *trans, int *m, int *n, int *kl, int *ku,double *alpha, double *a, int *lda, double *x, int *incx,double *beta, double *y, int *incy);
+
+void dcopy_(int *n, double *dx, int *incx, double *dy, int *incy);
